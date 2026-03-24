@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperança RPG - Sistema Base</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div id="app-container">
+        
+        <section id="view-login" class="view active">
+            <div class="login-box polygon-borda">
+                <h1 class="text-glitch" data-text="TEMPERANÇA OS">TEMPERANÇA OS</h1>
+                <p class="subtitle">Acesso Restrito</p>
+                
+                <form id="login-form">
+                    <div class="input-group">
+                        <label>NÍVEL DE ACESSO:</label>
+                        <select id="login-role">
+                            <option value="narrador">Juiz (Narrador)</option>
+                            <option value="jogador">Condenado (Jogador)</option>
+                        </select>
+                    </div>
+
+                    <div id="group-juiz">
+                        <div class="input-group">
+                            <label>IDENTIFICAÇÃO (Seu Nome):</label>
+                            <input type="text" id="login-name-juiz" autocomplete="off" placeholder="Ex: Administrador">
+                        </div>
+                    </div>
+                    
+                    <div id="group-jogador" class="hidden">
+                        <div class="input-group">
+                            <label>CÓDIGO DA SALA:</label>
+                            <input type="text" id="login-code" autocomplete="off" placeholder="Ex: A1B2C3">
+                        </div>
+                        <div class="input-group">
+                            <label>USUÁRIO (Definido pelo Juiz):</label>
+                            <input type="text" id="login-user-jogador" autocomplete="off" placeholder="Ex: Jorge">
+                        </div>
+                        <div class="input-group">
+                            <label>SENHA:</label>
+                            <input type="password" id="login-pass-jogador" autocomplete="off" style="background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-main); font-family: var(--font-terminal); font-size: 1.2rem; padding: 5px; outline: none; width: 100%;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">INICIAR SESSÃO</button>
+                    <p id="login-error" class="text-muted" style="color: var(--danger); margin-top: 10px; display: none;"></p>
+                </form>
+            </div>
+        </section>
+
+        <section id="view-narrator-dash" class="view">
+            <header class="dash-header">
+                <h2>BEM-VINDO, JUIZ <span id="narrator-name-display"></span></h2>
+                <button class="btn-danger btn-logout">DESCONECTAR</button>
+            </header>
+            
+            <div class="dash-content">
+                <div class="panel-box polygon-borda">
+                    <h3>SUAS CAMPANHAS</h3>
+                    <ul id="campaign-list" class="list-retro">
+                        </ul>
+                    
+                    <div class="action-bar">
+                        <input type="text" id="new-campaign-name" placeholder="Nome da nova campanha...">
+                        <button id="btn-create-campaign" class="btn-secondary">CRIAR CAMPANHA</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-narrator-camp" class="view">
+            <header class="dash-header">
+                <h2>CAMPANHA: <span id="current-campaign-name"></span></h2>
+                <div>
+                    <button id="btn-back-dash" class="btn-secondary">VOLTAR</button>
+                    <button class="btn-danger btn-logout">DESCONECTAR</button>
+                </div>
+            </header>
+
+            <div class="campaign-grid">
+                <div class="panel-box polygon-borda">
+                    <h3>CREDENCIAR JOGADORES</h3>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">Crie os acessos para a sua mesa.</p>
+                    <div class="add-player-box" style="flex-direction: column; gap: 10px;">
+                        <input type="text" id="new-user-name" placeholder="Usuário (Ex: Jorge)">
+                        <input type="password" id="new-user-pass" placeholder="Senha (Ex: 1234)">
+                        <button id="btn-create-user" class="btn-small" style="width: 100%;">EMITIR CREDENCIAL</button>
+                    </div>
+                    <h4 style="margin-top: 15px; color: var(--text-muted); font-size: 1rem;">ACESSOS ATIVOS:</h4>
+                    <ul id="campaign-users-list" class="list-retro">
+                        </ul>
+                </div>
+
+                <div class="panel-box polygon-borda">
+                    <h3>FICHAS E NPCS</h3>
+                    <button id="btn-create-sheet" class="btn-primary">NOVA FICHA</button>
+                    <ul id="sheets-list" class="list-retro">
+                        </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-player-dash" class="view">
+            <header class="dash-header">
+                <h2>CONDENADO: <span id="player-name-display"></span></h2>
+                <button class="btn-danger btn-logout">DESCONECTAR</button>
+            </header>
+
+            <div class="dash-content">
+                <div class="panel-box polygon-borda">
+                    <h3>SUAS FICHAS DISPONÍVEIS</h3>
+                    <p class="text-muted">Aguardando atribuição do Juiz...</p>
+                    <ul id="player-sheets-list" class="list-retro">
+                        </ul>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="sheet-modal" class="modal hidden">
+        <div class="modal-content vtt-layout">
+            <button id="btn-close-sheet" class="btn-danger" style="position: absolute; top: 10px; right: 10px; z-index: 100;">FECHAR [X]</button>
+            <button id="btn-save-sheet" class="btn-primary" style="position: absolute; top: 10px; right: 120px; z-index: 100;">SALVAR DADOS</button>
+            
+            <input type="hidden" id="sheet-id-active">
+
+            <header class="sheet-header polygon-borda" style="margin-top: 40px;">
+                <div class="header-info">
+                    <div class="info-group">
+                        <label>CONDENADO</label>
+                        <input type="text" id="sheet-nome" class="input-transparente nome-personagem" placeholder="Nome do Personagem">
+                    </div>
+                    <div class="info-group">
+                        <label>JOGADOR ATRIBUÍDO (Deixe vazio para NPC):</label>
+                        <input type="text" id="sheet-dono" class="input-transparente" placeholder="Ex: Jorge">
+                    </div>
+                </div>
+                <div class="header-status">
+                    <div class="status-box polygon-borda estresse-critical">
+                        <label>ESTRESSE</label>
+                        <input type="number" id="sheet-estresse" value="0" min="0" class="input-status readout-digital">
+                    </div>
+                </div>
+            </header>
+
+            <main class="sheet-body">
+                <section class="column-attributes">
+                    <h2 class="section-title text-glitch" data-text="ATRIBUTOS">ATRIBUTOS</h2>
+                    <div class="attribute-group active-attrs">
+                        <h3>ATIVOS (3, 2, 1, 1)</h3>
+                        <div class="attribute-box polygon-borda"><label>FÍSICO</label><input type="number" id="sheet-fisico" value="1" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>MOTORAS</label><input type="number" id="sheet-motoras" value="1" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>INTELECTO</label><input type="number" id="sheet-intelecto" value="1" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>MENTE</label><input type="number" id="sheet-mente" value="1" class="readout-digital"></div>
+                    </div>
+                    <div class="attribute-group passive-attrs">
+                        <h3>PASSIVOS (2, 1, 0)</h3>
+                        <div class="attribute-box polygon-borda"><label>VONTADE</label><input type="number" id="sheet-vontade" value="0" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>FORTITUDE</label><input type="number" id="sheet-fortitude" value="0" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>REFLEXOS</label><input type="number" id="sheet-reflexos" value="0" class="readout-digital"></div>
+                    </div>
+                </section>
+
+                <section class="column-health">
+                    <h2 class="section-title center-title text-glitch" data-text="STATUS VITAL">STATUS VITAL</h2>
+                    <p class="text-muted" style="text-align: center; font-size: 0.8rem;">Dano recebido</p>
+                    <textarea id="sheet-notas-dano" class="notes-area" placeholder="Anote aqui as feridas, traumas e membros perdidos..." style="height: 250px;"></textarea>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+/* Importando fontes para o clima Horror/Industrial */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=VT323&display=swap');
+
+/* Variáveis de Cor - O Clima de Temperança */
+:root {
+    --bg-dark: #0a0a0a;
+    --bg-panel: #141414;
+    --text-main: #c0c0c0;
+    --text-muted: #666;
+    --realce-green: #00ff6a; /* Cor padrão de interação (Terminal) */
+    --realce-red: #ff3333;   /* Cor de Dano, Estresse, Perigo */
+    --borda-color: #333;
+    
+    --font-readout: 'VT323', monospace; /* Para números */
+    --font-label: 'Oswald', sans-serif;  /* Para rótulos robustos */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Arial', sans-serif; /* Fallback */
+    overflow-x: hidden;
+    padding: 20px;
+    /* Efeito sutil de scanlines sobre a ficha inteira */
+    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+}
+
+/* Container Principal do VTT */
+.vtt-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* --- ESTILOS GERAIS DE CAIXAS (A estética Angular da referência) --- */
+
+/* Criando bordas chanfradas poligonais usando clip-path */
+.polygon-borda {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--borda-color);
+    position: relative;
+    /* Este clip-path corta os cantos da caixa */
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+/* Adicionando um detalhe de canto luminoso (como na referência) */
+.polygon-borda::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    background-color: var(--realce-green);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    opacity: 0.5;
+}
+
+/* Títulos de Seção com fonte Robusta */
+.section-title {
+    font-family: var(--font-label);
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: var(--realce-green);
+    margin-bottom: 10px;
+    border-bottom: 1px solid #222;
+    padding-bottom: 3px;
+}
+
+/* Títulos de Grupos menores */
+h3 {
+    font-family: var(--font-label);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+/* Estilo para números num "Readout Digital" (VT323) */
+.readout-digital {
+    font-family: var(--font-readout);
+    font-size: 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--realce-green);
+    text-shadow: 0 0 5px rgba(0, 255, 106, 0.5);
+}
+
+/* Entradas transparentes */
+.input-transparente {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #222;
+    color: var(--text-main);
+    padding: 2px 5px;
+    font-size: 1rem;
+}
+
+.input-transparente:focus {
+    outline: none;
+    border-bottom-color: var(--realce-green);
+}
+
+/* --- 1. CABEÇALHO --- */
+.sheet-header {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 15px;
+    padding: 15px;
+    align-items: center;
+}
+
+.portrait-placeholder {
+    width: 80px;
+    height: 80px;
+    background-color: #000;
+    border: 2px solid var(--borda-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Imitando o readout glitch da referência no retrato */
+.portrait-placeholder::after {
+    content: 'STATUS: FAILED';
+    position: absolute;
+    bottom: 2px;
+    font-family: var(--font-readout);
+    font-size: 0.8rem;
+    color: var(--realce-red);
+    opacity: 0.7;
+}
+
+.bio-hazard {
+    font-size: 3rem;
+    color: #1a1a1a;
+}
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-group label {
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.nome-personagem {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--realce-green);
+}
+
+.info-row {
+    display: flex;
+    gap: 15px;
+}
+
+.header-status {
+    display: flex;
+    gap: 10px;
+}
+
+.status-box {
+    padding: 8px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.status-box label {
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+}
+
+.input-status {
+    width: 50px;
+    text-align: center;
+}
+
+.max-value {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Cores de status baseados em Perigo */
+.estresse-critical {
+    border-color: var(--realce-red);
+    color: var(--realce-red);
+}
+
+.estresse-critical .readout-digital {
+    color: var(--realce-red);
+    text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+}
+
+.estresse-critical::before {
+    background-color: var(--realce-red);
+}
+
+/* --- 2. CORPO DA FICHA (Layout em 3 Colunas) --- */
+.sheet-body {
+    display: grid;
+    grid-template-columns: 250px 1fr 250px;
+    gap: 15px;
+}
+
+/* COLUNA ATRIBUTOS */
+.attribute-group {
+    margin-bottom: 15px;
+}
+
+.attribute-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.attribute-box:hover {
+    border-color: var(--realce-green);
+    background-color: #1a1a1a;
+}
+
+.attribute-box label {
+    font-family: var(--font-label);
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+}
+
+.attribute-box input {
+    width: 40px;
+    text-align: right;
+    pointer-events: none; /* Clica na caixa inteira, não no input */
+}
+
+/* Atributos Passivos com borda mais escura */
+.passive-attrs .attribute-box {
+    border-color: #222;
+}
+
+.passive-attrs .attribute-box .readout-digital {
+    color: var(--text-muted);
+}
+
+/* COLUNA SAÚDE (A central com silhueta) */
+.column-health {
+    position: relative;
+    padding: 10px;
+}
+
+/* Criando a silhueta anatomica estilizada como fundo usando pseudo-elemento */
+.anatomy-silhueta::after {
+    content: '';
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 250px;
+    height: 350px;
+    background-color: #111;
+    /* Um clip-path simples que sugere uma forma humana (cabeça/corpo) */
+    clip-path: polygon(50% 0%, 65% 5%, 70% 15%, 50% 20%, 80% 30%, 90% 60%, 80% 100%, 20% 100%, 10% 60%, 20% 30%);
+    z-index: 1;
+    opacity: 0.3;
+    border: 1px solid #222;
+}
+
+.section-title.center-title {
+    text-align: center;
+    position: relative;
+    z-index: 5;
+}
+
+.damage-tracks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    z-index: 5; /* Fica na frente da silhueta */
+    margin-top: 30px;
+}
+
+.damage-track {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.track-label {
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.track-cells {
+    display: flex;
+    gap: 5px;
+}
+
+/* Estilizando as caixas de seleção como marcadores de dano angulares */
+.damage-cell {
+    -webkit-appearance: none; /* Remove o visual padrão */
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #333;
+    background-color: #000;
+    cursor: pointer;
+    position: relative;
+    transform: rotate(45deg); /* Rotacionado para ficar angular */
+    transition: all 0.2s;
+}
+
+.damage-cell:checked {
+    background-color: var(--realce-red);
+    border-color: var(--realce-red);
+    box-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+}
+
+/* Cores de Perigo dos Rótulos (Temperança) */
+.danger-low { color: #555; }
+.danger-med { color: orange; }
+.danger-high { color: #ff5555; }
+.danger-critical { color: var(--realce-red); font-weight: bold; }
+
+/* COLUNA HABILIDADES */
+.skill-group {
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.skill-list {
+    list-style: none;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
+
+.skill-item {
+    padding: 3px 5px;
+    border-bottom: 1px dashed #1a1a1a;
+    cursor: pointer;
+}
+
+.skill-item:hover {
+    color: var(--realce-green);
+    background-color: #111;
+}
+
+.btn-add-small {
+    background: #1a1a1a;
+    border: 1px solid #222;
+    color: var(--text-muted);
+    padding: 0 5px;
+    cursor: pointer;
+    font-family: var(--font-readout);
+}
+
+.btn-add-small:hover {
+    color: var(--realce-green);
+    border-color: var(--realce-green);
+}
+
+/* --- 3. RODAPÉ --- */
+.sheet-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.footer-section {
+    padding: 10px;
+}
+
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.inventory-item {
+    background-color: #050505;
+    border: 1px solid #1a1a1a;
+    padding: 10px;
+    font-size: 0.8rem;
+    text-align: center;
+    min-height: 40px;
+}
+
+.empty-slot {
+    color: #1a1a1a;
+    font-family: var(--font-readout);
+}
+
+.notes-area {
+    width: 100%;
+    height: 100px;
+    background-color: #050505;
+    border: 1px solid #1a1a1a;
+    color: var(--text-main);
+    font-family: 'Arial', sans-serif;
+    font-size: 0.85rem;
+    padding: 8px;
+    resize: none;
+    margin-top: 5px;
+}
+
+.notes-area:focus {
+    outline: none;
+    border-color: var(--realce-green);
+}
+
+/* EFEITOS ESPECIAIS (Glitch sutil) */
+.text-glitch {
+    position: relative;
+}
+
+.text-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 2px;
+    text-shadow: -1px 0 red;
+    background: var(--bg-dark);
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: noise-anim 2s infinite linear alternate-reverse;
+}
+
+@keyframes noise-anim {
+  0% { clip: rect(10px, 9999px, 20px, 0); }
+  20% { clip: rect(30px, 9999px, 40px, 0); }
+  /* ... (Mais frames para o glitch) */
+  100% { clip: rect(10px, 9999px, 30px, 0); }
+}

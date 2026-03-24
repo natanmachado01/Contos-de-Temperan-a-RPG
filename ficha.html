@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperança RPG - Ficha do Condenado</title>
+    <link rel="stylesheet" href="style-ficha.css">
+</head>
+<body>
+    <div class="vtt-layout">
+        
+        <header class="sheet-header polygon-borda">
+            <div class="portrait-container">
+                <div class="portrait-placeholder">
+                    <span class="bio-hazard">☠</span>
+                </div>
+            </div>
+            <div class="header-info">
+                <div class="info-group">
+                    <label>CONDENADO</label>
+                    <input type="text" placeholder="Nome do Personagem" class="input-transparente nome-personagem">
+                </div>
+                <div class="info-row">
+                    <div class="info-group">
+                        <label>PERSONA</label>
+                        <input type="text" placeholder="Ex: Arthur" class="input-transparente">
+                    </div>
+                    <div class="info-group">
+                        <label>ORIGEM</label>
+                        <input type="text" placeholder="Ex: Operário" class="input-transparente">
+                    </div>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-box polygon-borda estresse-critical">
+                    <label>ESTRESSE</label>
+                    <input type="number" value="0" min="0" max="10" class="input-status readout-digital">
+                    <span class="max-value">/ <span id="max-estresse">4</span></span>
+                </div>
+                <div class="status-box polygon-borda reacoes-normal">
+                    <label>REAÇÕES</label>
+                    <input type="number" value="1" min="0" class="input-status readout-digital">
+                </div>
+            </div>
+        </header>
+
+        <main class="sheet-body">
+            <section class="column-attributes">
+                <h2 class="section-title text-glitch" data-text="ATRIBUTOS">ATRIBUTOS</h2>
+                
+                <div class="attribute-group active-attrs">
+                    <h3>ATIVOS</h3>
+                    <div class="attribute-box polygon-borda combat-rollable" data-attr="fisico">
+                        <label>FÍSICO</label>
+                        <input type="number" value="1" class="readout-digital">
+                    </div>
+                    <div class="attribute-box polygon-borda combat-rollable" data-attr="motoras">
+                        <label>MOTORAS</label>
+                        <input type="number" value="1" class="readout-digital">
+                    </div>
+                    <div class="attribute-box polygon-borda combat-rollable" data-attr="intelecto">
+                        <label>INTELECTO</label>
+                        <input type="number" value="1" class="readout-digital">
+                    </div>
+                    <div class="attribute-box polygon-borda combat-rollable" data-attr="mente">
+                        <label>MENTE</label>
+                        <input type="number" value="1" class="readout-digital">
+                    </div>
+                </div>
+
+                <div class="attribute-group passive-attrs">
+                    <h3>PASSIVOS</h3>
+                    <div class="attribute-box polygon-borda passive-defense" data-attr="vontade">
+                        <label>VONTADE</label>
+                        <input type="number" value="0" class="readout-digital">
+                    </div>
+                    <div class="attribute-box polygon-borda passive-defense" data-attr="fortitude">
+                        <label>FORTITUDE</label>
+                        <input type="number" value="0" class="readout-digital">
+                    </div>
+                    <div class="attribute-box polygon-borda passive-defense" data-attr="reflexos">
+                        <label>REFLEXOS</label>
+                        <input type="number" value="0" class="readout-digital">
+                    </div>
+                </div>
+            </section>
+
+            <section class="column-health">
+                <div class="anatomy-silhueta">
+                    <h2 class="section-title center-title text-glitch" data-text="STATUS VITAL">STATUS VITAL</h2>
+                    
+                    <div class="damage-tracks-container">
+                        <div class="damage-track polygon-borda" id="track-machucado">
+                            <label class="track-label danger-low">MACHUCADO</label>
+                            <div class="track-cells">
+                                <input type="checkbox" class="damage-cell">
+                                <input type="checkbox" class="damage-cell">
+                                <input type="checkbox" class="damage-cell">
+                                <input type="checkbox" class="damage-cell">
+                                </div>
+                        </div>
+
+                        <div class="damage-track polygon-borda" id="track-ferimento">
+                            <label class="track-label danger-med">FERIMENTO</label>
+                            <div class="track-cells">
+                                <input type="checkbox" class="damage-cell">
+                                <input type="checkbox" class="damage-cell">
+                            </div>
+                        </div>
+
+                        <div class="damage-track polygon-borda" id="track-trauma">
+                            <label class="track-label danger-high">TRAUMA</label>
+                            <div class="track-cells">
+                                <input type="checkbox" class="damage-cell">
+                            </div>
+                        </div>
+
+                        <div class="damage-track polygon-borda" id="track-letal">
+                            <label class="track-label danger-critical">LETAL</label>
+                            <div class="track-cells">
+                                <input type="checkbox" class="damage-cell">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="column-skills">
+                <h2 class="section-title text-glitch" data-text="HABILIDADES">HABILIDADES</h2>
+                
+                <div class="skill-group polygon-borda">
+                    <h3>TÉCNICAS</h3>
+                    <ul class="skill-list" id="list-tecnicas">
+                        <li class="skill-item skill-rollable" data-skill="atletismo">Atletismo [+1]</li>
+                        <li class="skill-item skill-rollable" data-skill="furtividade">Furtividade [+1]</li>
+                        </ul>
+                    <button class="btn-add-small">+</button>
+                </div>
+
+                <div class="skill-group polygon-borda">
+                    <h3>COMBATE</h3>
+                    <ul class="skill-list" id="list-combate">
+                        <li class="skill-item skill-rollable" data-skill="armas_fogo">Armas de Fogo [+1]</li>
+                        <li class="skill-item skill-rollable" data-skill="luta">Luta [+1]</li>
+                    </ul>
+                    <button class="btn-add-small">+</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="sheet-footer">
+            <div class="footer-section polygon-borda">
+                <h3>INVENTÁRIO</h3>
+                <div class="inventory-grid">
+                    <div class="inventory-item empty-slot">[VAZIO]</div>
+                    <div class="inventory-item empty-slot">[VAZIO]</div>
+                    <div class="inventory-item empty-slot">[VAZIO]</div>
+                    </div>
+            </div>
+            <div class="footer-section polygon-borda">
+                <h3>TALENTOS / NOTAS</h3>
+                <textarea class="notes-area" placeholder="Habilidades Especiais ou Anotações Médicas..."></textarea>
+            </div>
+        </footer>
+
+    </div>
+</body>
+</html>

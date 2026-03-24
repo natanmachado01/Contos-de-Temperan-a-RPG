@@ -1,0 +1,17 @@
+# Dependências do Node.js
+node_modules/
+package-lock.json
+
+# Banco de Dados Local (NÃO SUBIR PARA EVITAR VAZAMENTO DE DADOS)
+vtt-db.json
+
+# Arquivos de Log do NPM
+npm-debug.log
+*.log
+
+# Arquivos de Sistema Operacional (Windows/Mac)
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente (caso usemos no futuro para senhas de servidor)
+.env

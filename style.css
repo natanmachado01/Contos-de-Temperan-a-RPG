@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+    --bg-dark: #050505;
+    --panel-bg: #111;
+    --text-main: #00ff6a;
+    --text-muted: #008833;
+    --danger: #ff3333;
+    --border: #00aa55;
+    --font-terminal: 'VT323', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-terminal);
+    font-size: 1.2rem;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Efeito Monitor Antigo */
+.scanlines {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+#app-container {
+    width: 100%; max-width: 1000px;
+    height: 90vh;
+    position: relative;
+    z-index: 10;
+}
+
+/* Controle de Telas (SPA) */
+.view { display: none; width: 100%; height: 100%; flex-direction: column; }
+.view.active { display: flex; }
+.hidden { display: none !important; }
+
+/* Caixas Poligonais (Identidade Visual) */
+.polygon-borda {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 170, 85, 0.2);
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+}
+
+/* Tipografia e Inputs */
+h1, h2, h3 { color: var(--text-main); margin-bottom: 15px; text-shadow: 0 0 5px var(--text-main); }
+.text-muted { color: var(--text-muted); }
+
+.input-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+.input-group label { margin-bottom: 5px; color: var(--text-muted); }
+
+input[type="text"], select {
+    background: transparent;
+    border: none; border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+    font-family: var(--font-terminal);
+    font-size: 1.2rem; padding: 5px; outline: none;
+}
+input[type="text"]:focus { border-bottom-color: #fff; }
+
+/* Botões */
+button {
+    font-family: var(--font-terminal); font-size: 1.2rem;
+    padding: 8px 15px; cursor: pointer; border: 1px solid;
+    transition: 0.2s; background: transparent;
+}
+.btn-primary { border-color: var(--text-main); color: var(--text-main); width: 100%; }
+.btn-primary:hover { background: var(--text-main); color: var(--bg-dark); }
+
+.btn-secondary { border-color: var(--text-muted); color: var(--text-muted); }
+.btn-secondary:hover { background: var(--text-muted); color: var(--bg-dark); }
+
+.btn-danger { border-color: var(--danger); color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: var(--bg-dark); box-shadow: 0 0 10px var(--danger); }
+
+.btn-small { font-size: 1rem; padding: 4px 8px; border-color: var(--text-main); color: var(--text-main); }
+
+/* Layouts Internos */
+.login-box { max-width: 400px; margin: auto; }
+
+.dash-header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px;
+}
+
+.dash-content { flex: 1; }
+.campaign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; }
+
+.action-bar, .add-player-box { display: flex; gap: 10px; margin-top: 15px; }
+.action-bar input, .add-player-box input { flex: 1; }
+
+.list-retro { list-style: none; margin-top: 10px; }
+.list-retro li {
+    padding: 8px; border-bottom: 1px dashed var(--text-muted);
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+}
+.list-retro li:hover { background: rgba(0, 255, 106, 0.1); }
+
+/* ==========================================
+   MODAL DA FICHA
+========================================== */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.modal.hidden {
+    display: none !important;
+}
+
+.modal-content {
+    background-color: var(--bg-dark);
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    padding: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 20px rgba(0, 255, 106, 0.1);
+}
+
+/* Layout Interno da Ficha Simplificado para o VTT */
+.sheet-header { display: flex; justify-content: space-between; padding: 15px; margin-bottom: 20px; }
+.sheet-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.attribute-box { display: flex; justify-content: space-between; padding: 5px 10px; margin-bottom: 5px; }
+.attribute-box input { width: 50px; text-align: right; background: transparent; border: none; color: var(--text-main); font-family: var(--font-terminal); font-size: 1.5rem; outline: none; }
+.notes-area { width: 100%; background: #0a0a0a; border: 1px solid var(--border); color: var(--text-main); font-family: sans-serif; padding: 10px; resize: none; outline: none;}
