@@ -137,42 +137,126 @@
                         <input type="text" id="sheet-nome" class="input-transparente nome-personagem" placeholder="Nome do Personagem">
                     </div>
                     <div class="info-group">
-                        <label>JOGADOR ATRIBUÍDO (Deixe vazio para NPC):</label>
-                        <input type="text" id="sheet-dono" class="input-transparente" placeholder="Ex: Jorge">
+                        <label>JOGADOR ATRIBUÍDO</label>
+                        <input type="text" id="sheet-dono" class="input-transparente" placeholder="Deixe vazio para NPC">
                     </div>
                 </div>
                 <div class="header-status">
                     <div class="status-box polygon-borda estresse-critical">
                         <label>ESTRESSE</label>
-                        <input type="number" id="sheet-estresse" value="0" min="0" class="input-status readout-digital">
+                        <div style="display: flex; align-items: baseline;">
+                            <input type="number" id="sheet-estresse" value="0" min="0" class="input-status readout-digital">
+                            <span class="max-value">/ <span id="sheet-max-estresse">4</span></span>
+                        </div>
+                    </div>
+                    <div class="status-box polygon-borda reacoes-normal">
+                        <label>REAÇÕES</label>
+                        <div style="display: flex; align-items: baseline;">
+                            <span class="readout-digital" id="sheet-max-reacoes">1</span>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <main class="sheet-body">
+            <div class="sheet-tabs" style="display: flex; gap: 10px; margin-top: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                <button class="tab-btn active" data-tab="tab-principal">PRINCIPAL</button>
+                <button class="tab-btn" data-tab="tab-inventario">INVENTÁRIO & CARGA</button>
+                <button class="tab-btn" data-tab="tab-talentos">TALENTOS & OCULTO</button>
+            </div>
+
+            <main id="tab-principal" class="sheet-body tab-content active" style="grid-template-columns: 1fr 1fr; margin-top: 15px;">
                 <section class="column-attributes">
-                    <h2 class="section-title text-glitch" data-text="ATRIBUTOS">ATRIBUTOS</h2>
+                    <h2 class="section-title text-glitch" data-text="FUNDAÇÃO">FUNDAÇÃO</h2>
+                    
                     <div class="attribute-group active-attrs">
-                        <h3>ATIVOS (3, 2, 1, 1)</h3>
-                        <div class="attribute-box polygon-borda"><label>FÍSICO</label><input type="number" id="sheet-fisico" value="1" class="readout-digital"></div>
-                        <div class="attribute-box polygon-borda"><label>MOTORAS</label><input type="number" id="sheet-motoras" value="1" class="readout-digital"></div>
-                        <div class="attribute-box polygon-borda"><label>INTELECTO</label><input type="number" id="sheet-intelecto" value="1" class="readout-digital"></div>
-                        <div class="attribute-box polygon-borda"><label>MENTE</label><input type="number" id="sheet-mente" value="1" class="readout-digital"></div>
+                        <h3>ATIVOS</h3>
+                        <div class="attribute-box polygon-borda"><label>FÍSICO</label><input type="number" id="sheet-fisico" value="1" min="0" max="5" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>MOTORAS</label><input type="number" id="sheet-motoras" value="1" min="0" max="5" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>INTELECTO</label><input type="number" id="sheet-intelecto" value="1" min="0" max="5" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>MENTE</label><input type="number" id="sheet-mente" value="1" min="0" max="5" class="readout-digital"></div>
                     </div>
+
                     <div class="attribute-group passive-attrs">
-                        <h3>PASSIVOS (2, 1, 0)</h3>
-                        <div class="attribute-box polygon-borda"><label>VONTADE</label><input type="number" id="sheet-vontade" value="0" class="readout-digital"></div>
-                        <div class="attribute-box polygon-borda"><label>FORTITUDE</label><input type="number" id="sheet-fortitude" value="0" class="readout-digital"></div>
-                        <div class="attribute-box polygon-borda"><label>REFLEXOS</label><input type="number" id="sheet-reflexos" value="0" class="readout-digital"></div>
+                        <h3>PASSIVOS</h3>
+                        <div class="attribute-box polygon-borda"><label>VONTADE</label><input type="number" id="sheet-vontade" value="0" min="0" max="3" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>FORTITUDE</label><input type="number" id="sheet-fortitude" value="0" min="0" max="3" class="readout-digital"></div>
+                        <div class="attribute-box polygon-borda"><label>REFLEXOS</label><input type="number" id="sheet-reflexos" value="0" min="0" max="3" class="readout-digital"></div>
+                    </div>
+                    
+                    <div class="attribute-group skills-attrs" style="margin-top: 15px;">
+                        <h3>HABILIDADES TÉCNICAS E COMBATE</h3>
+                        <textarea id="sheet-habilidades" class="notes-area" placeholder="Ex: Atletismo [+1]&#10;Armas de Fogo [+2]" style="height: 150px;"></textarea>
                     </div>
                 </section>
 
                 <section class="column-health">
                     <h2 class="section-title center-title text-glitch" data-text="STATUS VITAL">STATUS VITAL</h2>
-                    <p class="text-muted" style="text-align: center; font-size: 0.8rem;">Dano recebido</p>
-                    <textarea id="sheet-notas-dano" class="notes-area" placeholder="Anote aqui as feridas, traumas e membros perdidos..." style="height: 250px;"></textarea>
+                    
+                    <div class="damage-tracks-container" style="margin-top: 10px;">
+                        <div class="damage-track polygon-borda">
+                            <label class="track-label danger-low">MACHUCADO <span class="text-muted" style="font-size: 0.7em;">(Leve)</span></label>
+                            <div class="track-cells" id="track-machucado-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                        </div>
+                        <div class="damage-track polygon-borda">
+                            <label class="track-label danger-med">FERIMENTO <span class="text-muted" style="font-size: 0.7em;">(Moderado)</span></label>
+                            <div class="track-cells" id="track-ferimento-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                        </div>
+                        <div class="damage-track polygon-borda">
+                            <label class="track-label danger-high">TRAUMA <span class="text-muted" style="font-size: 0.7em;">(Grave)</span></label>
+                            <div class="track-cells" id="track-trauma-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                        </div>
+                        <div class="damage-track polygon-borda" style="border-color: var(--danger);">
+                            <label class="track-label danger-critical" style="color: var(--danger);">LETAL <span class="text-muted" style="font-size: 0.7em;">(Pé na Cova)</span></label>
+                            <div class="track-cells" id="track-letal-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <h3>CONDIÇÕES FÍSICAS/MENTAIS</h3>
+                        <textarea id="sheet-condicoes" class="notes-area" placeholder="Ex: Braço Lesionado (-1 ataque)&#10;Sangramento (DT 8 Fortitude)" style="height: 100px; border-color: var(--danger);"></textarea>
+                    </div>
                 </section>
             </main>
+
+            <main id="tab-inventario" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                <div class="status-box polygon-borda" style="flex-direction: row; justify-content: space-between; padding: 15px;">
+                    <label style="font-size: 1.2rem;">CARGA MÁXIMA DISPONÍVEL:</label>
+                    <span class="readout-digital" id="sheet-max-carga" style="font-size: 2rem;">12</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="inventory-group polygon-borda">
+                        <h3>ARMAS E PROTEÇÕES (Equipadas)</h3>
+                        <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Anotar Durabilidade, Dano e Efeitos</p>
+                        <textarea id="sheet-equipamentos" class="notes-area" placeholder="Arma: Revólver (Dano 2d6 / Recarga 4) [Durabilidade: 5]&#10;Proteção: Jaqueta (+1 red. dano) [Durabilidade: 4]" style="height: 250px;"></textarea>
+                    </div>
+
+                    <div class="inventory-group polygon-borda">
+                        <h3>MOCHILA (Recursos, Consumíveis e Acessórios)</h3>
+                        <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">1 de Carga a cada 3 comidas/sucatas/componentes</p>
+                        <textarea id="sheet-inventario" class="notes-area" placeholder="Ex: 2x Erva Verde&#10;5x Sucata&#10;Acessório: Lanterna" style="height: 250px;"></textarea>
+                    </div>
+                </div>
+            </main>
+
+            <main id="tab-talentos" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="inventory-group polygon-borda">
+                        <h3>TALENTOS EQUIPADOS (Máx: 5)</h3>
+                        <textarea id="sheet-talentos" class="notes-area" placeholder="Ex: Casca Grossa (Tier 1 - Violência)" style="height: 150px; border-color: var(--text-main);"></textarea>
+                    </div>
+                    <div class="inventory-group polygon-borda">
+                        <h3>FEITIÇOS E RITUAIS (Máx: 2+Mente)</h3>
+                        <textarea id="sheet-feiticos" class="notes-area" placeholder="Ex: Névoa Negra&#10;Componentes precisos e Efeitos..." style="height: 150px; color: #b366ff; border-color: #b366ff;"></textarea>
+                    </div>
+                </div>
+                
+                <div class="inventory-group polygon-borda">
+                    <h3>TODOS OS TALENTOS E ANOTAÇÕES HISTÓRICAS</h3>
+                    <textarea id="sheet-notas-gerais" class="notes-area" placeholder="Anotações sobre a campanha, pistas e o histórico do Condenado..." style="height: 150px;"></textarea>
+                </div>
+            </main>
+
         </div>
     </div>
 

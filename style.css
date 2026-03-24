@@ -145,3 +145,30 @@ button {
 .attribute-box { display: flex; justify-content: space-between; padding: 5px 10px; margin-bottom: 5px; }
 .attribute-box input { width: 50px; text-align: right; background: transparent; border: none; color: var(--text-main); font-family: var(--font-terminal); font-size: 1.5rem; outline: none; }
 .notes-area { width: 100%; background: #0a0a0a; border: 1px solid var(--border); color: var(--text-main); font-family: sans-serif; padding: 10px; resize: none; outline: none;}
+
+/* ==========================================
+   ESTILOS DE ABAS (TABS)
+========================================== */
+.sheet-tabs .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px;
+    font-family: var(--font-terminal);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sheet-tabs .tab-btn:hover {
+    background: rgba(0, 170, 85, 0.1);
+    color: var(--text-main);
+}
+
+.sheet-tabs .tab-btn.active {
+    background: var(--panel-bg);
+    color: var(--text-main);
+    border-bottom: 3px solid var(--text-main);
+    box-shadow: inset 0 -5px 10px rgba(0, 255, 106, 0.1);
+}

@@ -1,5 +1,5 @@
 // ==========================================
-// ESTADO DA APLICAÇÃO
+// 1. ESTADO DA APLICAÇÃO E VARIÁVEIS GERAIS
 // ==========================================
 let currentUser = null; 
 let currentCampaign = null;
@@ -11,14 +11,23 @@ const views = {
     playerDash: document.getElementById('view-player-dash')
 };
 
+const sheetModal = document.getElementById('sheet-modal');
+
+// ==========================================
+// 2. FUNÇÕES DE UTILIDADE E API (SERVIDOR)
+// ==========================================
 function showView(viewName) {
     Object.values(views).forEach(v => v.classList.remove('active'));
     views[viewName].classList.add('active');
 }
 
-// ==========================================
-// COMUNICAÇÃO COM O SERVIDOR (API)
-// ==========================================
+function generateInviteCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) { code += chars.charAt(Math.floor(Math.random() * chars.length)); }
+    return code;
+}
+
 async function getCampaignsDB() {
     const response = await fetch('/api/campaigns');
     return await response.json();
@@ -32,18 +41,8 @@ async function saveCampaignsDB(campaigns) {
     });
 }
 
-function generateInviteCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) { code += chars.charAt(Math.floor(Math.random() * chars.length)); }
-    return code;
-}
-
 // ==========================================
-// LÓGICA DE LOGIN E ACESSO
-// ==========================================
-// ==========================================
-// LÓGICA DE LOGIN E ACESSO (VERSÃO BLINDADA)
+// 3. LÓGICA DE LOGIN E LOGOUT
 // ==========================================
 document.getElementById('login-role').addEventListener('change', (e) => {
     const groupJuiz = document.getElementById('group-juiz');
@@ -93,10 +92,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
                 return;
             }
 
-            // Proteção 1: Garante que a lista de usuários existe (caso seja uma campanha velha)
             const usersList = targetCampaign.users || [];
-            
-            // Proteção 2: Busca o usuário evitando quebras por letras maiúsculas/minúsculas
             const validUser = usersList.find(u => 
                 u && u.username && u.username.toLowerCase() === username.toLowerCase() && u.password === pass
             );
@@ -107,7 +103,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
                 return;
             }
 
-            // Tudo certo! Configura o jogador
             currentUser = { name: validUser.username, role, assignedSheets: validUser.sheets || [] };
             currentCampaign = targetCampaign;
 
@@ -123,7 +118,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     }
 });
 
-// Botões de Desconectar (Logout)
 document.querySelectorAll('.btn-logout').forEach(btn => {
     btn.addEventListener('click', () => {
         currentUser = null;
@@ -135,94 +129,7 @@ document.querySelectorAll('.btn-logout').forEach(btn => {
 });
 
 // ==========================================
-// RENDERIZAR FICHAS DO JOGADOR
-// ==========================================
-function renderPlayerSheets() {
-    const list = document.getElementById('player-sheets-list');
-    list.innerHTML = '';
-    
-    // Proteção 3: Se a campanha for velha e não tiver fichas criadas, não quebra
-    const sheets = currentCampaign.sheets || [];
-    
-    // Filtra as fichas em que o campo dono (ignorando maiúsculas) bate com o usuário
-    const minhasFichas = sheets.filter(f => (f.dono || "").toLowerCase() === currentUser.name.toLowerCase());
-    
-    if (minhasFichas.length === 0) {
-        list.innerHTML = '<li class="text-muted">O Juiz ainda não atribuiu nenhum Condenado a você.</li>';
-        return;
-    }
-
-    minhasFichas.forEach(ficha => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>> ${ficha.nome}</span> <button class="btn-small btn-access-sheet">ACESSAR</button>`;
-        li.querySelector('.btn-access-sheet').addEventListener('click', () => openSheet(ficha));
-        list.appendChild(li);
-    });
-}
-
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const role = document.getElementById('login-role').value;
-    const errorMsg = document.getElementById('login-error');
-    errorMsg.style.display = 'none';
-
-    if (role === 'narrador') {
-        const name = document.getElementById('login-name-juiz').value.trim();
-        if (!name) return;
-        
-        currentUser = { name, role };
-        document.getElementById('narrator-name-display').innerText = name.toUpperCase();
-        showView('narratorDash');
-        await loadCampaigns(); 
-    } else {
-        const code = document.getElementById('login-code').value.trim().toUpperCase();
-        const username = document.getElementById('login-user-jogador').value.trim();
-        const pass = document.getElementById('login-pass-jogador').value.trim();
-
-        if (!code || !username || !pass) {
-            errorMsg.innerText = "[ERRO] Preencha todos os campos da credencial.";
-            errorMsg.style.display = 'block';
-            return;
-        }
-
-        const campaigns = await getCampaignsDB();
-        const targetCampaign = campaigns.find(c => c.inviteCode === code);
-
-        if (!targetCampaign) {
-            errorMsg.innerText = "[ACESSO NEGADO] Código de sala inexistente.";
-            errorMsg.style.display = 'block';
-            return;
-        }
-
-        const validUser = targetCampaign.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === pass);
-
-        if (!validUser) {
-            errorMsg.innerText = "[ACESSO NEGADO] Usuário ou senha incorretos.";
-            errorMsg.style.display = 'block';
-            return;
-        }
-
-        currentUser = { name: validUser.username, role, assignedSheets: validUser.sheets || [] };
-        renderPlayerSheets();
-        currentCampaign = targetCampaign;
-
-        document.getElementById('player-name-display').innerText = `${validUser.username.toUpperCase()} [SALA: ${targetCampaign.name}]`;
-        showView('playerDash');
-    }
-});
-
-document.querySelectorAll('.btn-logout').forEach(btn => {
-    btn.addEventListener('click', () => {
-        currentUser = null;
-        currentCampaign = null;
-        document.getElementById('login-form').reset();
-        document.getElementById('login-error').style.display = 'none';
-        showView('login');
-    });
-});
-
-// ==========================================
-// PAINEL DO NARRADOR - CAMPANHAS
+// 4. PAINEL DO NARRADOR - GESTÃO DE CAMPANHAS
 // ==========================================
 async function loadCampaigns() {
     const campaigns = await getCampaignsDB();
@@ -267,7 +174,7 @@ document.getElementById('btn-create-campaign').addEventListener('click', async (
 });
 
 // ==========================================
-// DENTRO DA CAMPANHA (Narrador)
+// 5. DENTRO DA CAMPANHA (NARRADOR) - USUÁRIOS
 // ==========================================
 async function openCampaign(campaign) {
     const campaigns = await getCampaignsDB();
@@ -341,55 +248,13 @@ function renderCampaignUsers() {
                 renderCampaignUsers();
             }
         });
-        
         list.appendChild(li);
     });
+}
 
-    // ==========================================
-// SISTEMA DE FICHAS DE PERSONAGEM
 // ==========================================
-const sheetModal = document.getElementById('sheet-modal');
-
-// Botão FECHAR Ficha
-document.getElementById('btn-close-sheet').addEventListener('click', () => {
-    sheetModal.classList.add('hidden');
-    // Atualiza as listas na tela que ficou por baixo
-    if (currentUser.role === 'narrador') renderCampaignSheets();
-    if (currentUser.role === 'jogador') renderPlayerSheets();
-});
-
-// Botão NOVA FICHA (Visão Juiz)
-// Botão NOVA FICHA (Visão Juiz)
-document.getElementById('btn-create-sheet').addEventListener('click', async () => {
-    if (!currentCampaign) return;
-
-    const campaigns = await getCampaignsDB();
-    const campIndex = campaigns.findIndex(c => c.id === currentCampaign.id);
-    
-    if (campIndex > -1) {
-        // Proteção: Se a campanha for velha e não tiver a gaveta de fichas, cria agora
-        if (!campaigns[campIndex].sheets) {
-            campaigns[campIndex].sheets = [];
-        }
-
-        const novaFicha = {
-            id: 'ficha_' + Date.now(),
-            nome: "Novo Condenado",
-            dono: "", 
-            estresse: 0,
-            ativos: { fisico: 1, motoras: 1, intelecto: 1, mente: 1 },
-            passivos: { vontade: 0, fortitude: 0, reflexos: 0 },
-            notasDano: ""
-        };
-        
-        campaigns[campIndex].sheets.push(novaFicha);
-        await saveCampaignsDB(campaigns);
-        currentCampaign = campaigns[campIndex];
-        renderCampaignSheets();
-    }
-});
-
-// Renderizar Fichas para o Juiz
+// 6. SISTEMA DE FICHAS DE PERSONAGEM
+// ==========================================
 function renderCampaignSheets() {
     const list = document.getElementById('sheets-list');
     list.innerHTML = '';
@@ -411,12 +276,10 @@ function renderCampaignSheets() {
     });
 }
 
-// Renderizar Fichas para o Jogador (Apenas as que ele é dono)
 function renderPlayerSheets() {
     const list = document.getElementById('player-sheets-list');
     list.innerHTML = '';
     
-    // Proteção: garante que "sheets" existe mesmo em campanhas criadas antes da atualização
     const sheets = currentCampaign.sheets || [];
     const minhasFichas = sheets.filter(f => (f.dono || "").toLowerCase() === currentUser.name.toLowerCase());
     
@@ -427,22 +290,55 @@ function renderPlayerSheets() {
 
     minhasFichas.forEach(ficha => {
         const li = document.createElement('li');
-        li.innerHTML = `<span>> ${ficha.nome}</span> <button class="btn-small">ACESSAR</button>`;
-        li.querySelector('button').addEventListener('click', () => openSheet(ficha));
+        li.innerHTML = `<span>> ${ficha.nome}</span> <button class="btn-small btn-access-sheet">ACESSAR</button>`;
+        li.querySelector('.btn-access-sheet').addEventListener('click', () => openSheet(ficha));
         list.appendChild(li);
     });
 }
 
+// Criação da estrutura base de um Condenado
+document.getElementById('btn-create-sheet').addEventListener('click', async () => {
+    if (!currentCampaign) return;
+
+    const campaigns = await getCampaignsDB();
+    const campIndex = campaigns.findIndex(c => c.id === currentCampaign.id);
+    
+    if (campIndex > -1) {
+        if (!campaigns[campIndex].sheets) {
+            campaigns[campIndex].sheets = [];
+        }
+
+        const novaFicha = {
+            id: 'ficha_' + Date.now(),
+            nome: "Novo Condenado",
+            dono: "", 
+            estresse: 0,
+            ativos: { fisico: 1, motoras: 1, intelecto: 1, mente: 1 },
+            passivos: { vontade: 0, fortitude: 0, reflexos: 0 },
+            habilidades: "",
+            condicoes: "",
+            equipamentos: "",
+            inventario: "",
+            talentos: "",
+            dano: { machucado: 0, ferimento: 0, trauma: 0, letal: 0 }
+        };
+        
+        campaigns[campIndex].sheets.push(novaFicha);
+        await saveCampaignsDB(campaigns);
+        currentCampaign = campaigns[campIndex];
+        renderCampaignSheets();
+    }
+});
+
 // ==========================================
-// ABRIR A FICHA NO MODAL (VERSÃO BLINDADA)
+// 7. ABRIR, EDITAR E SALVAR A FICHA (MODAL)
 // ==========================================
 function openSheet(ficha) {
     try {
-        // Proteções contra fichas antigas ou propriedades ausentes no JSON
         const ativos = ficha.ativos || { fisico: 1, motoras: 1, intelecto: 1, mente: 1 };
         const passivos = ficha.passivos || { vontade: 0, fortitude: 0, reflexos: 0 };
+        const dano = ficha.dano || { machucado: 0, ferimento: 0, trauma: 0, letal: 0 };
 
-        // Preenche o HTML com os dados do JSON (ou valores vazios/padrão caso não existam)
         document.getElementById('sheet-id-active').value = ficha.id || '';
         document.getElementById('sheet-nome').value = ficha.nome || '';
         document.getElementById('sheet-dono').value = ficha.dono || '';
@@ -457,13 +353,23 @@ function openSheet(ficha) {
         document.getElementById('sheet-fortitude').value = passivos.fortitude || 0;
         document.getElementById('sheet-reflexos').value = passivos.reflexos || 0;
         
-        document.getElementById('sheet-notas-dano').value = ficha.notasDano || "";
+        // Carrega as áreas de texto
+        document.getElementById('sheet-habilidades').value = ficha.habilidades || '';
+        document.getElementById('sheet-condicoes').value = ficha.condicoes || '';
+        document.getElementById('sheet-equipamentos').value = ficha.equipamentos || '';
+        document.getElementById('sheet-inventario').value = ficha.inventario || '';
+        document.getElementById('sheet-talentos').value = ficha.talentos || '';
 
-        // Bloqueia o campo "Dono" se for um jogador acessando (só o Juiz pode mudar o dono)
-        document.getElementById('sheet-dono').disabled = (currentUser && currentUser.role === 'jogador');
+        const campoDono = document.getElementById('sheet-dono');
+        if (campoDono) {
+            campoDono.disabled = (currentUser && currentUser.role === 'jogador');
+        }
 
-        // Mostra o Modal de forma segura puxando direto do documento
-        document.getElementById('sheet-modal').classList.remove('hidden');
+        // Calcula os limites e constrói o dano
+        atualizarAtributosDerivados();
+        renderizarTrilhasDano(dano);
+
+        sheetModal.classList.remove('hidden');
 
     } catch (erro) {
         console.error("[ERRO DO SISTEMA] Falha ao renderizar a ficha:", erro);
@@ -471,7 +377,12 @@ function openSheet(ficha) {
     }
 }
 
-// Salvar Dados da Ficha
+document.getElementById('btn-close-sheet').addEventListener('click', () => {
+    sheetModal.classList.add('hidden');
+    if (currentUser.role === 'narrador') renderCampaignSheets();
+    if (currentUser.role === 'jogador') renderPlayerSheets();
+});
+
 document.getElementById('btn-save-sheet').addEventListener('click', async () => {
     const idAtiva = document.getElementById('sheet-id-active').value;
     const campaigns = await getCampaignsDB();
@@ -481,7 +392,6 @@ document.getElementById('btn-save-sheet').addEventListener('click', async () => 
         const sheetIndex = campaigns[campIndex].sheets.findIndex(s => s.id === idAtiva);
         
         if (sheetIndex > -1) {
-            // Atualiza o objeto com os valores digitados na tela
             campaigns[campIndex].sheets[sheetIndex].nome = document.getElementById('sheet-nome').value || "Sem Nome";
             campaigns[campIndex].sheets[sheetIndex].dono = document.getElementById('sheet-dono').value.trim();
             campaigns[campIndex].sheets[sheetIndex].estresse = parseInt(document.getElementById('sheet-estresse').value) || 0;
@@ -495,19 +405,113 @@ document.getElementById('btn-save-sheet').addEventListener('click', async () => 
             campaigns[campIndex].sheets[sheetIndex].passivos.fortitude = parseInt(document.getElementById('sheet-fortitude').value) || 0;
             campaigns[campIndex].sheets[sheetIndex].passivos.reflexos = parseInt(document.getElementById('sheet-reflexos').value) || 0;
             
-            campaigns[campIndex].sheets[sheetIndex].notasDano = document.getElementById('sheet-notas-dano').value;
+            campaigns[campIndex].sheets[sheetIndex].habilidades = document.getElementById('sheet-habilidades').value;
+            campaigns[campIndex].sheets[sheetIndex].condicoes = document.getElementById('sheet-condicoes').value;
+            campaigns[campIndex].sheets[sheetIndex].equipamentos = document.getElementById('sheet-equipamentos').value;
+            campaigns[campIndex].sheets[sheetIndex].inventario = document.getElementById('sheet-inventario').value;
+            campaigns[campIndex].sheets[sheetIndex].talentos = document.getElementById('sheet-talentos').value;
             
-            // Salva no servidor
+            // Grava o estado atual das caixas de seleção de dano
+            campaigns[campIndex].sheets[sheetIndex].dano = capturarEstadoDoDano();
+            
             await saveCampaignsDB(campaigns);
-            currentCampaign = campaigns[campIndex]; // Atualiza local
+            currentCampaign = campaigns[campIndex]; 
             
-            // Atualiza visualmente as listas debaixo do modal
             if (currentUser.role === 'narrador') renderCampaignSheets();
             if (currentUser.role === 'jogador') renderPlayerSheets();
 
-            alert("Ficha salva no sistema do Juiz com sucesso!");
+            alert("Ficha guardada com sucesso!");
         }
+    }
+    
+            // Lógica de Troca de Abas na Ficha
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove 'active' de todos os botões e esconde todos os conteúdos
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                
+                // Adiciona 'active' no botão clicado e mostra o conteúdo correspondente
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.tab).classList.remove('hidden');
+            });
+        });
+});
+
+// ==========================================
+// 8. LÓGICA DE REGRAS TEMPERANÇA (AUTOMAÇÃO)
+// ==========================================
+
+// Configura os inputs para recalcular o ecrã instantaneamente ao alterar os números
+['sheet-fisico', 'sheet-motoras', 'sheet-mente'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+        atualizarAtributosDerivados();
+        if (id === 'sheet-fisico') {
+            // Se o Físico mudar, as barras de vida sofrem alteração de tamanho
+            const estadoAtual = capturarEstadoDoDano();
+            renderizarTrilhasDano(estadoAtual);
+        }
+    });
+});
+
+function atualizarAtributosDerivados() {
+    const fisico = parseInt(document.getElementById('sheet-fisico').value) || 0;
+    const motoras = parseInt(document.getElementById('sheet-motoras').value) || 0;
+    const mente = parseInt(document.getElementById('sheet-mente').value) || 0;
+
+    // Verifica se há pelo menos um Trauma marcado na tela
+    const temTrauma = document.querySelectorAll('#track-trauma-cells input:checked').length > 0;
+    
+    // Fórmulas baseadas nos Atributos
+    document.getElementById('sheet-max-estresse').innerText = 4 + mente;
+    document.getElementById('sheet-max-reacoes').innerText = 1 + motoras;
+    
+    // Carga: 10 + (Físico * 2). Se tiver trauma, subtrai 3.
+    let cargaMaxima = 10 + (fisico * 2);
+    if (temTrauma) cargaMaxima -= 3;
+    
+    document.getElementById('sheet-max-carga').innerText = cargaMaxima;
+}
+
+function renderizarTrilhasDano(danoSalvo) {
+    const fisico = parseInt(document.getElementById('sheet-fisico').value) || 0;
+    
+    // Regras de quantidade de caixas de dano: O Machucado e Ferimento escalam com Físico
+    const maxMachucado = 3 + fisico;
+    const maxFerimento = 2 + Math.floor(fisico / 2);
+    const maxTrauma = 1 + Math.floor (fisico / 3);
+    const maxLetal = 1;
+
+    gerarCaixasDano('track-machucado-cells', maxMachucado, danoSalvo.machucado);
+    gerarCaixasDano('track-ferimento-cells', maxFerimento, danoSalvo.ferimento);
+    gerarCaixasDano('track-trauma-cells', maxTrauma, danoSalvo.trauma);
+    gerarCaixasDano('track-letal-cells', maxLetal, danoSalvo.letal);
+}
+
+document.querySelector('.damage-tracks-container').addEventListener('change', (e) => {
+    if (e.target.classList.contains('damage-cell')) {
+        atualizarAtributosDerivados();
     }
 });
 
+function gerarCaixasDano(containerId, totalCaixas, caixasMarcadas) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // Limpa o interior
+    
+    for (let i = 0; i < totalCaixas; i++) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'damage-cell';
+        if (i < caixasMarcadas) checkbox.checked = true;
+        container.appendChild(checkbox);
+    }
+}
+
+function capturarEstadoDoDano() {
+    return {
+        machucado: document.querySelectorAll('#track-machucado-cells input:checked').length,
+        ferimento: document.querySelectorAll('#track-ferimento-cells input:checked').length,
+        trauma: document.querySelectorAll('#track-trauma-cells input:checked').length,
+        letal: document.querySelectorAll('#track-letal-cells input:checked').length
+    };
 }
