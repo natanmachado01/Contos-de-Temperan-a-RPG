@@ -418,8 +418,6 @@ function renderPlayerSheets() {
     
     // Proteção: garante que "sheets" existe mesmo em campanhas criadas antes da atualização
     const sheets = currentCampaign.sheets || [];
-    
-    // Filtra as fichas onde o campo "dono" é igual ao nome do usuário atual
     const minhasFichas = sheets.filter(f => (f.dono || "").toLowerCase() === currentUser.name.toLowerCase());
     
     if (minhasFichas.length === 0) {
