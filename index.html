@@ -126,7 +126,7 @@
     <div id="sheet-modal" class="modal hidden">
         <div class="modal-content vtt-layout">
             <button id="btn-close-sheet" class="btn-danger" style="position: absolute; top: 10px; right: 10px; z-index: 100;">FECHAR [X]</button>
-            <button id="btn-save-sheet" class="btn-primary" style="position: absolute; top: 10px; right: 120px; z-index: 100;">SALVAR DADOS</button>
+            <button id="btn-save-sheet" class="btn-primary" style="position: absolute; top: 10px; right: 120px; z-index: 100; width: auto; padding: 8px 20px;">SALVAR DADOS</button>
             
             <input type="hidden" id="sheet-id-active">
 
@@ -160,6 +160,7 @@
 
             <div class="sheet-tabs" style="display: flex; gap: 10px; margin-top: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
                 <button class="tab-btn active" data-tab="tab-principal">PRINCIPAL</button>
+                <button class="tab-btn" data-tab="tab-habilidades">HABILIDADES</button>
                 <button class="tab-btn" data-tab="tab-inventario">INVENTÁRIO & CARGA</button>
                 <button class="tab-btn" data-tab="tab-talentos">TALENTOS & OCULTO</button>
             </div>
@@ -182,17 +183,31 @@
                         <div class="attribute-box polygon-borda"><label>FORTITUDE</label><input type="number" id="sheet-fortitude" value="0" min="0" max="3" class="readout-digital"></div>
                         <div class="attribute-box polygon-borda"><label>REFLEXOS</label><input type="number" id="sheet-reflexos" value="0" min="0" max="3" class="readout-digital"></div>
                     </div>
-                    
-                    <div class="attribute-group skills-attrs" style="margin-top: 15px;">
-                        <h3>HABILIDADES TÉCNICAS E COMBATE</h3>
-                        <textarea id="sheet-habilidades" class="notes-area" placeholder="Ex: Atletismo [+1]&#10;Armas de Fogo [+2]" style="height: 150px;"></textarea>
-                    </div>
                 </section>
 
                 <section class="column-health">
                     <h2 class="section-title center-title text-glitch" data-text="STATUS VITAL">STATUS VITAL</h2>
                     
-                    <div class="damage-tracks-container" style="margin-top: 10px;">
+                    <div class="thresholds-box polygon-borda" style="margin-top: 10px; margin-bottom: 15px; padding: 10px; background: #0a0a0a;">
+                        <h3 style="margin-bottom: 8px; text-align: center; color: var(--text-main);">LIMIARES DE DANO</h3>
+                        <div style="display: flex; justify-content: space-around; text-align: center;">
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--text-muted);">MAIOR (Leve)</label><br>
+                                <input type="number" id="sheet-limite-maior" value="6" class="readout-digital" style="width: 50px; text-align: center; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-main);">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--text-muted);">GRAVE (Mod.)</label><br>
+                                <input type="number" id="sheet-limite-grave" value="12" class="readout-digital" style="width: 50px; text-align: center; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-main);">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: var(--danger);">LETAL (Pé na Cova)</label><br>
+                                <span id="sheet-limite-letal" class="readout-digital" style="color: var(--danger); display: block; margin-top: 3px;">24</span>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.65rem; color: #555; text-align: center; margin-top: 5px;">Dano Leve &lt; Limiar Maior | Limiar Maior &le; Dano Moderado. &lt; Limiar Grave | Grave &le; Dano Grave &lt; Limiar Letal | Limiar Letal &le; Dano Letal</p>
+                    </div>
+
+                    <div class="damage-tracks-container">
                         <div class="damage-track polygon-borda">
                             <label class="track-label danger-low">MACHUCADO <span class="text-muted" style="font-size: 0.7em;">(Leve)</span></label>
                             <div class="track-cells" id="track-machucado-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
@@ -216,6 +231,19 @@
                         <textarea id="sheet-condicoes" class="notes-area" placeholder="Ex: Braço Lesionado (-1 ataque)&#10;Sangramento (DT 8 Fortitude)" style="height: 100px; border-color: var(--danger);"></textarea>
                     </div>
                 </section>
+            </main>
+
+            <main id="tab-habilidades" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                <div class="inventory-group polygon-borda">
+                    <h3>HABILIDADES TÉCNICAS</h3>
+                    <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Atletismo, Ciências, Crime, Eloquência, Engenharia, Furtividade, História, Infâmia, Medicina, Misticismo, Percepção, Sobrevivência</p>
+                    <textarea id="sheet-hab-tecnicas" class="notes-area" placeholder="Ex: Atletismo [+1]&#10;Medicina [+2]" style="height: 180px;"></textarea>
+                </div>
+                <div class="inventory-group polygon-borda">
+                    <h3>HABILIDADES DE COMBATE</h3>
+                    <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Desarmado, Armas Brancas, Armas de Disparo, Armas de Fogo</p>
+                    <textarea id="sheet-hab-combate" class="notes-area" placeholder="Ex: Armas de Fogo [+2]&#10;Desarmado [+1]" style="height: 120px;"></textarea>
+                </div>
             </main>
 
             <main id="tab-inventario" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
@@ -242,17 +270,17 @@
             <main id="tab-talentos" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="inventory-group polygon-borda">
-                        <h3>TALENTOS EQUIPADOS (Máx: 5)</h3>
+                        <h3>TALENTOS </h3>
                         <textarea id="sheet-talentos" class="notes-area" placeholder="Ex: Casca Grossa (Tier 1 - Violência)" style="height: 150px; border-color: var(--text-main);"></textarea>
                     </div>
                     <div class="inventory-group polygon-borda">
-                        <h3>FEITIÇOS E RITUAIS (Máx: 2+Mente)</h3>
+                        <h3>FEITIÇOS (Máx: 2+Mente)</h3>
                         <textarea id="sheet-feiticos" class="notes-area" placeholder="Ex: Névoa Negra&#10;Componentes precisos e Efeitos..." style="height: 150px; color: #b366ff; border-color: #b366ff;"></textarea>
                     </div>
                 </div>
                 
                 <div class="inventory-group polygon-borda">
-                    <h3>TODOS OS TALENTOS E ANOTAÇÕES HISTÓRICAS</h3>
+                    <h3>ANOTAÇÕES HISTÓRICAS</h3>
                     <textarea id="sheet-notas-gerais" class="notes-area" placeholder="Anotações sobre a campanha, pistas e o histórico do Condenado..." style="height: 150px;"></textarea>
                 </div>
             </main>

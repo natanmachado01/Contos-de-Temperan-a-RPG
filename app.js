@@ -87,7 +87,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             const targetCampaign = campaigns.find(c => c.inviteCode === code);
 
             if (!targetCampaign) {
-                errorMsg.innerText = "[ACESSO NEGADO] Código de sala inexistente. Cuidado com a Letra 'O' e o Número '0'.";
+                errorMsg.innerText = "[ACESSO NEGADO] Código de sala inexistente. Cuidado com 'O' e '0'.";
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -113,7 +113,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         }
     } catch (erro) {
         console.error("Erro Crítico no Login:", erro);
-        errorMsg.innerText = "[ERRO DE SISTEMA] Falha ao ler banco de dados. Verifique se o server.js está rodando.";
+        errorMsg.innerText = "[ERRO DE SISTEMA] Falha ao ler banco de dados. Verifique o servidor.";
         errorMsg.style.display = 'block';
     }
 });
@@ -296,7 +296,6 @@ function renderPlayerSheets() {
     });
 }
 
-// Criação da estrutura base de um Condenado
 document.getElementById('btn-create-sheet').addEventListener('click', async () => {
     if (!currentCampaign) return;
 
@@ -315,11 +314,15 @@ document.getElementById('btn-create-sheet').addEventListener('click', async () =
             estresse: 0,
             ativos: { fisico: 1, motoras: 1, intelecto: 1, mente: 1 },
             passivos: { vontade: 0, fortitude: 0, reflexos: 0 },
-            habilidades: "",
+            limites: { maior: 6, grave: 12 }, 
+            habTecnicas: "", 
+            habCombate: "",
             condicoes: "",
             equipamentos: "",
             inventario: "",
             talentos: "",
+            feiticos: "",
+            notasGerais: "",
             dano: { machucado: 0, ferimento: 0, trauma: 0, letal: 0 }
         };
         
@@ -338,6 +341,7 @@ function openSheet(ficha) {
         const ativos = ficha.ativos || { fisico: 1, motoras: 1, intelecto: 1, mente: 1 };
         const passivos = ficha.passivos || { vontade: 0, fortitude: 0, reflexos: 0 };
         const dano = ficha.dano || { machucado: 0, ferimento: 0, trauma: 0, letal: 0 };
+        const limites = ficha.limites || { maior: 6, grave: 12 };
 
         document.getElementById('sheet-id-active').value = ficha.id || '';
         document.getElementById('sheet-nome').value = ficha.nome || '';
@@ -353,21 +357,34 @@ function openSheet(ficha) {
         document.getElementById('sheet-fortitude').value = passivos.fortitude || 0;
         document.getElementById('sheet-reflexos').value = passivos.reflexos || 0;
         
-        // Carrega as áreas de texto
-        document.getElementById('sheet-habilidades').value = ficha.habilidades || '';
+        // Limiares de Dano
+        document.getElementById('sheet-limite-maior').value = limites.maior || 6;
+        document.getElementById('sheet-limite-grave').value = limites.grave || 12;
+        document.getElementById('sheet-limite-letal').innerText = (limites.grave || 12) * 2;
+        
+        // Habilidades separadas (fallback para campanhas antigas)
+        document.getElementById('sheet-hab-tecnicas').value = ficha.habTecnicas || ficha.habilidades || '';
+        document.getElementById('sheet-hab-combate').value = ficha.habCombate || '';
+        
         document.getElementById('sheet-condicoes').value = ficha.condicoes || '';
         document.getElementById('sheet-equipamentos').value = ficha.equipamentos || '';
         document.getElementById('sheet-inventario').value = ficha.inventario || '';
         document.getElementById('sheet-talentos').value = ficha.talentos || '';
+        document.getElementById('sheet-feiticos').value = ficha.feiticos || '';
+        document.getElementById('sheet-notas-gerais').value = ficha.notasGerais || '';
 
         const campoDono = document.getElementById('sheet-dono');
         if (campoDono) {
             campoDono.disabled = (currentUser && currentUser.role === 'jogador');
         }
 
-        // Calcula os limites e constrói o dano
         atualizarAtributosDerivados();
         renderizarTrilhasDano(dano);
+
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelector('[data-tab="tab-principal"]').classList.add('active');
+        document.getElementById('tab-principal').classList.remove('hidden');
 
         sheetModal.classList.remove('hidden');
 
@@ -377,6 +394,7 @@ function openSheet(ficha) {
     }
 }
 
+// Fechar Ficha (mantém igual)
 document.getElementById('btn-close-sheet').addEventListener('click', () => {
     sheetModal.classList.add('hidden');
     if (currentUser.role === 'narrador') renderCampaignSheets();
@@ -405,13 +423,21 @@ document.getElementById('btn-save-sheet').addEventListener('click', async () => 
             campaigns[campIndex].sheets[sheetIndex].passivos.fortitude = parseInt(document.getElementById('sheet-fortitude').value) || 0;
             campaigns[campIndex].sheets[sheetIndex].passivos.reflexos = parseInt(document.getElementById('sheet-reflexos').value) || 0;
             
-            campaigns[campIndex].sheets[sheetIndex].habilidades = document.getElementById('sheet-habilidades').value;
+            // Salvar Limites e Habilidades novas
+            if (!campaigns[campIndex].sheets[sheetIndex].limites) campaigns[campIndex].sheets[sheetIndex].limites = {};
+            campaigns[campIndex].sheets[sheetIndex].limites.maior = parseInt(document.getElementById('sheet-limite-maior').value) || 6;
+            campaigns[campIndex].sheets[sheetIndex].limites.grave = parseInt(document.getElementById('sheet-limite-grave').value) || 12;
+            
+            campaigns[campIndex].sheets[sheetIndex].habTecnicas = document.getElementById('sheet-hab-tecnicas').value;
+            campaigns[campIndex].sheets[sheetIndex].habCombate = document.getElementById('sheet-hab-combate').value;
+            
             campaigns[campIndex].sheets[sheetIndex].condicoes = document.getElementById('sheet-condicoes').value;
             campaigns[campIndex].sheets[sheetIndex].equipamentos = document.getElementById('sheet-equipamentos').value;
             campaigns[campIndex].sheets[sheetIndex].inventario = document.getElementById('sheet-inventario').value;
             campaigns[campIndex].sheets[sheetIndex].talentos = document.getElementById('sheet-talentos').value;
+            campaigns[campIndex].sheets[sheetIndex].feiticos = document.getElementById('sheet-feiticos').value;
+            campaigns[campIndex].sheets[sheetIndex].notasGerais = document.getElementById('sheet-notas-gerais').value;
             
-            // Grava o estado atual das caixas de seleção de dano
             campaigns[campIndex].sheets[sheetIndex].dano = capturarEstadoDoDano();
             
             await saveCampaignsDB(campaigns);
@@ -423,31 +449,16 @@ document.getElementById('btn-save-sheet').addEventListener('click', async () => 
             alert("Ficha guardada com sucesso!");
         }
     }
-    
-            // Lógica de Troca de Abas na Ficha
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Remove 'active' de todos os botões e esconde todos os conteúdos
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                
-                // Adiciona 'active' no botão clicado e mostra o conteúdo correspondente
-                e.target.classList.add('active');
-                document.getElementById(e.target.dataset.tab).classList.remove('hidden');
-            });
-        });
 });
 
 // ==========================================
-// 8. LÓGICA DE REGRAS TEMPERANÇA (AUTOMAÇÃO)
+// 8. LÓGICA DE REGRAS TEMPERANÇA E ABAS
 // ==========================================
 
-// Configura os inputs para recalcular o ecrã instantaneamente ao alterar os números
 ['sheet-fisico', 'sheet-motoras', 'sheet-mente'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => {
         atualizarAtributosDerivados();
         if (id === 'sheet-fisico') {
-            // Se o Físico mudar, as barras de vida sofrem alteração de tamanho
             const estadoAtual = capturarEstadoDoDano();
             renderizarTrilhasDano(estadoAtual);
         }
@@ -459,14 +470,11 @@ function atualizarAtributosDerivados() {
     const motoras = parseInt(document.getElementById('sheet-motoras').value) || 0;
     const mente = parseInt(document.getElementById('sheet-mente').value) || 0;
 
-    // Verifica se há pelo menos um Trauma marcado na tela
     const temTrauma = document.querySelectorAll('#track-trauma-cells input:checked').length > 0;
     
-    // Fórmulas baseadas nos Atributos
     document.getElementById('sheet-max-estresse').innerText = 4 + mente;
     document.getElementById('sheet-max-reacoes').innerText = 1 + motoras;
     
-    // Carga: 10 + (Físico * 2). Se tiver trauma, subtrai 3.
     let cargaMaxima = 10 + (fisico * 2);
     if (temTrauma) cargaMaxima -= 3;
     
@@ -476,11 +484,22 @@ function atualizarAtributosDerivados() {
 function renderizarTrilhasDano(danoSalvo) {
     const fisico = parseInt(document.getElementById('sheet-fisico').value) || 0;
     
-    // Regras de quantidade de caixas de dano: O Machucado e Ferimento escalam com Físico
-    const maxMachucado = 3 + fisico;
-    const maxFerimento = 2 + Math.floor(fisico / 2);
-    const maxTrauma = 1 + Math.floor (fisico / 3);
+    // Valores iniciais do Condenado (Físico 0)
+    let maxMachucado = 3;
+    let maxFerimento = 2;
+    let maxTrauma = 1;
     const maxLetal = 1;
+
+    // A cada 1 ponto de físico, distribui 1 espaço extra na ordem da hierarquia
+    for (let i = 1; i <= fisico; i++) {
+        if (i % 3 === 1) {
+            maxMachucado++;
+        } else if (i % 3 === 2) {
+            maxFerimento++;
+        } else if (i % 3 === 0) {
+            maxTrauma++;
+        }
+    }
 
     gerarCaixasDano('track-machucado-cells', maxMachucado, danoSalvo.machucado);
     gerarCaixasDano('track-ferimento-cells', maxFerimento, danoSalvo.ferimento);
@@ -496,7 +515,8 @@ document.querySelector('.damage-tracks-container').addEventListener('change', (e
 
 function gerarCaixasDano(containerId, totalCaixas, caixasMarcadas) {
     const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Limpa o interior
+    if (!container) return;
+    container.innerHTML = ''; 
     
     for (let i = 0; i < totalCaixas; i++) {
         const checkbox = document.createElement('input');
@@ -515,3 +535,23 @@ function capturarEstadoDoDano() {
         letal: document.querySelectorAll('#track-letal-cells input:checked').length
     };
 }
+
+// Automação: O Limite Letal é sempre o dobro do Limite Grave
+document.getElementById('sheet-limite-grave').addEventListener('change', (e) => {
+    const valorGrave = parseInt(e.target.value) || 12;
+    document.getElementById('sheet-limite-letal').innerText = valorGrave * 2;
+});
+
+// NAVEGAÇÃO DAS ABAS (Corrigido "conteudo" sem acento)
+document.addEventListener('click', (e) => {
+    const tabClicada = e.target.closest('.tab-btn');
+    if (!tabClicada) return; 
+
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(conteudo => conteudo.classList.add('hidden'));
+
+    tabClicada.classList.add('active');
+
+    const idDaAbaAlvo = tabClicada.getAttribute('data-tab');
+    document.getElementById(idDaAbaAlvo).classList.remove('hidden');
+});
