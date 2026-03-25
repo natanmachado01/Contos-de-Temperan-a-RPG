@@ -207,21 +207,54 @@
                         <p style="font-size: 0.65rem; color: #555; text-align: center; margin-top: 5px;">Dano Leve &lt; Limiar Maior | Limiar Maior &le; Dano Moderado. &lt; Limiar Grave | Grave &le; Dano Grave &lt; Limiar Letal | Limiar Letal &le; Dano Letal</p>
                     </div>
 
+                    <!-- Memória oculta para os modificadores de dano -->
+                    <input type="hidden" id="sheet-mod-machucado" value="0">
+                    <input type="hidden" id="sheet-mod-ferimento" value="0">
+                    <input type="hidden" id="sheet-mod-trauma" value="0">
+                    <input type="hidden" id="sheet-mod-letal" value="0">
+
                     <div class="damage-tracks-container">
                         <div class="damage-track polygon-borda">
-                            <label class="track-label danger-low">MACHUCADO <span class="text-muted" style="font-size: 0.7em;">(Leve)</span></label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <label class="track-label danger-low">MACHUCADO <span class="text-muted" style="font-size: 0.7em;">(Leve)</span></label>
+                                <div>
+                                    <button type="button" class="btn-mod-dano" data-tipo="machucado" data-acao="-1">[-]</button>
+                                    <button type="button" class="btn-mod-dano" data-tipo="machucado" data-acao="1">[+]</button>
+                                </div>
+                            </div>
                             <div class="track-cells" id="track-machucado-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
                         </div>
+                        
                         <div class="damage-track polygon-borda">
-                            <label class="track-label danger-med">FERIMENTO <span class="text-muted" style="font-size: 0.7em;">(Moderado)</span></label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <label class="track-label danger-med">FERIMENTO <span class="text-muted" style="font-size: 0.7em;">(Mod.)</span></label>
+                                <div>
+                                    <button type="button" class="btn-mod-dano" data-tipo="ferimento" data-acao="-1">[-]</button>
+                                    <button type="button" class="btn-mod-dano" data-tipo="ferimento" data-acao="1">[+]</button>
+                                </div>
+                            </div>
                             <div class="track-cells" id="track-ferimento-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
                         </div>
+                        
                         <div class="damage-track polygon-borda">
-                            <label class="track-label danger-high">TRAUMA <span class="text-muted" style="font-size: 0.7em;">(Grave)</span></label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <label class="track-label danger-high">TRAUMA <span class="text-muted" style="font-size: 0.7em;">(Grave)</span></label>
+                                <div>
+                                    <button type="button" class="btn-mod-dano" data-tipo="trauma" data-acao="-1">[-]</button>
+                                    <button type="button" class="btn-mod-dano" data-tipo="trauma" data-acao="1">[+]</button>
+                                </div>
+                            </div>
                             <div class="track-cells" id="track-trauma-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
                         </div>
+                        
                         <div class="damage-track polygon-borda" style="border-color: var(--danger);">
-                            <label class="track-label danger-critical" style="color: var(--danger);">LETAL <span class="text-muted" style="font-size: 0.7em;">(Pé na Cova)</span></label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <label class="track-label danger-critical" style="color: var(--danger);">LETAL <span class="text-muted" style="font-size: 0.7em;">(Pé na Cova)</span></label>
+                                <div>
+                                    <button type="button" class="btn-mod-dano" data-tipo="letal" data-acao="-1">[-]</button>
+                                    <button type="button" class="btn-mod-dano" data-tipo="letal" data-acao="1">[+]</button>
+                                </div>
+                            </div>
                             <div class="track-cells" id="track-letal-cells" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
                         </div>
                     </div>
@@ -235,12 +268,12 @@
 
             <main id="tab-habilidades" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
                 <div class="inventory-group polygon-borda">
-                    <h3>HABILIDADES TÉCNICAS</h3>
+                    <h3 style="display: flex; justify-content: space-between; align-items: center;">HABILIDADES TÉCNICAS <button class="btn-small btn-add-compendium" data-target="sheet-hab-tecnicas" data-category="habTecnicas">[+] ADD</button></h3>
                     <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Atletismo, Ciências, Crime, Eloquência, Engenharia, Furtividade, História, Infâmia, Medicina, Misticismo, Percepção, Sobrevivência</p>
                     <textarea id="sheet-hab-tecnicas" class="notes-area" placeholder="Ex: Atletismo [+1]&#10;Medicina [+2]" style="height: 180px;"></textarea>
                 </div>
                 <div class="inventory-group polygon-borda">
-                    <h3>HABILIDADES DE COMBATE</h3>
+                    <h3 style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">HABILIDADES DE COMBATE <button class="btn-small btn-add-compendium" data-target="sheet-hab-combate" data-category="habCombate">[+] ADD</button></h3>
                     <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Desarmado, Armas Brancas, Armas de Disparo, Armas de Fogo</p>
                     <textarea id="sheet-hab-combate" class="notes-area" placeholder="Ex: Armas de Fogo [+2]&#10;Desarmado [+1]" style="height: 120px;"></textarea>
                 </div>
@@ -254,13 +287,13 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="inventory-group polygon-borda">
-                        <h3>ARMAS E PROTEÇÕES (Equipadas)</h3>
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">ARMAS E PROTEÇÕES <button class="btn-small btn-add-compendium" data-target="sheet-equipamentos" data-category="equipamentos">[+] ADD</button></h3>
                         <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">Anotar Durabilidade, Dano e Efeitos</p>
                         <textarea id="sheet-equipamentos" class="notes-area" placeholder="Arma: Revólver (Dano 2d6 / Recarga 4) [Durabilidade: 5]&#10;Proteção: Jaqueta (+1 red. dano) [Durabilidade: 4]" style="height: 250px;"></textarea>
                     </div>
 
                     <div class="inventory-group polygon-borda">
-                        <h3>MOCHILA (Recursos, Consumíveis e Acessórios)</h3>
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">MOCHILA (Recursos) <button class="btn-small btn-add-compendium" data-target="sheet-inventario" data-category="inventario">[+] ADD</button></h3>
                         <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 5px;">1 de Carga a cada 3 comidas/sucatas/componentes</p>
                         <textarea id="sheet-inventario" class="notes-area" placeholder="Ex: 2x Erva Verde&#10;5x Sucata&#10;Acessório: Lanterna" style="height: 250px;"></textarea>
                     </div>
@@ -270,11 +303,11 @@
             <main id="tab-talentos" class="sheet-body tab-content hidden" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="inventory-group polygon-borda">
-                        <h3>TALENTOS </h3>
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">TALENTOS EQUIPADOS <button class="btn-small btn-add-compendium" data-target="sheet-talentos" data-category="talentos">[+] ADD</button></h3>
                         <textarea id="sheet-talentos" class="notes-area" placeholder="Ex: Casca Grossa (Tier 1 - Violência)" style="height: 150px; border-color: var(--text-main);"></textarea>
                     </div>
                     <div class="inventory-group polygon-borda">
-                        <h3>FEITIÇOS (Máx: 2+Mente)</h3>
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">FEITIÇOS E RITUAIS <button class="btn-small btn-add-compendium" data-target="sheet-feiticos" data-category="feiticos">[+] ADD</button></h3>
                         <textarea id="sheet-feiticos" class="notes-area" placeholder="Ex: Névoa Negra&#10;Componentes precisos e Efeitos..." style="height: 150px; color: #b366ff; border-color: #b366ff;"></textarea>
                     </div>
                 </div>
@@ -288,6 +321,28 @@
         </div>
     </div>
 
+    <!-- MODAL DO COMPÊNDIO (BANCO DE DADOS) -->
+    <div id="compendium-modal" class="modal hidden" style="z-index: 3000;">
+        <div class="modal-content vtt-layout" style="max-width: 600px; border-color: #00ff6a;">
+            <button id="btn-close-compendium" class="btn-danger" style="position: absolute; top: 10px; right: 10px; z-index: 100;">FECHAR [X]</button>
+            
+            <h2 id="compendium-title" class="text-glitch" data-text="COMPÊNDIO" style="margin-top: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">COMPÊNDIO</h2>
+            
+            <input type="text" id="compendium-search" placeholder="Buscar no banco de dados..." style="width: 100%; margin: 15px 0; padding: 10px; background: #0a0a0a; color: var(--text-main); border: 1px solid var(--border); font-family: var(--font-terminal); font-size: 1rem;">
+            
+            <ul id="compendium-list" class="list-retro" style="max-height: 350px; overflow-y: auto; margin-bottom: 20px; padding-right: 10px;">
+                <!-- Os itens aparecerão aqui -->
+            </ul>
+
+            <div class="polygon-borda" style="padding: 15px; background: rgba(0, 255, 106, 0.05);">
+                <h3 style="margin-bottom: 10px;">ADICIONAR PERSONALIZADO</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="compendium-custom-val" placeholder="Escreva o item ou habilidade..." style="flex: 1; padding: 8px; background: #000; color: var(--text-main); border: 1px solid var(--border); font-family: sans-serif;">
+                    <button id="btn-add-custom-compendium" class="btn-primary" style="width: auto; padding: 0 15px;">INSERIR</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script src="app.js"></script>
 </body>

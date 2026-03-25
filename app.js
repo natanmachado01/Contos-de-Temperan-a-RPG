@@ -362,6 +362,12 @@ function openSheet(ficha) {
         document.getElementById('sheet-limite-grave').value = limites.grave || 12;
         document.getElementById('sheet-limite-letal').innerText = (limites.grave || 12) * 2;
         
+        const modDano = ficha.modDano || { machucado: 0, ferimento: 0, trauma: 0, letal: 0 };
+        document.getElementById('sheet-mod-machucado').value = modDano.machucado || 0;
+        document.getElementById('sheet-mod-ferimento').value = modDano.ferimento || 0;
+        document.getElementById('sheet-mod-trauma').value = modDano.trauma || 0;
+        document.getElementById('sheet-mod-letal').value = modDano.letal || 0;
+        
         // Habilidades separadas (fallback para campanhas antigas)
         document.getElementById('sheet-hab-tecnicas').value = ficha.habTecnicas || ficha.habilidades || '';
         document.getElementById('sheet-hab-combate').value = ficha.habCombate || '';
@@ -439,6 +445,12 @@ document.getElementById('btn-save-sheet').addEventListener('click', async () => 
             campaigns[campIndex].sheets[sheetIndex].notasGerais = document.getElementById('sheet-notas-gerais').value;
             
             campaigns[campIndex].sheets[sheetIndex].dano = capturarEstadoDoDano();
+            campaigns[campIndex].sheets[sheetIndex].modDano = {
+                machucado: parseInt(document.getElementById('sheet-mod-machucado').value) || 0,
+                ferimento: parseInt(document.getElementById('sheet-mod-ferimento').value) || 0,
+                trauma: parseInt(document.getElementById('sheet-mod-trauma').value) || 0,
+                letal: parseInt(document.getElementById('sheet-mod-letal').value) || 0
+            };
             
             await saveCampaignsDB(campaigns);
             currentCampaign = campaigns[campIndex]; 
@@ -454,6 +466,25 @@ document.getElementById('btn-save-sheet').addEventListener('click', async () => 
 // ==========================================
 // 8. LÓGICA DE REGRAS TEMPERANÇA E ABAS
 // ==========================================
+
+// Controle manual de espaços de dano (+ e -)
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-mod-dano')) {
+        e.preventDefault();
+        const tipo = e.target.getAttribute('data-tipo');
+        const acao = parseInt(e.target.getAttribute('data-acao'));
+        
+        // Pega o valor atual na memória invisível e ajusta
+        const inputMod = document.getElementById(`sheet-mod-${tipo}`);
+        let valorAtual = parseInt(inputMod.value) || 0;
+        inputMod.value = valorAtual + acao;
+
+        // Salva os que já estão marcados, redesenha as caixas e recalcula a carga
+        const estadoAtual = capturarEstadoDoDano();
+        renderizarTrilhasDano(estadoAtual);
+        atualizarAtributosDerivados();
+    }
+});
 
 ['sheet-fisico', 'sheet-motoras', 'sheet-mente'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => {
@@ -484,22 +515,28 @@ function atualizarAtributosDerivados() {
 function renderizarTrilhasDano(danoSalvo) {
     const fisico = parseInt(document.getElementById('sheet-fisico').value) || 0;
     
-    // Valores iniciais do Condenado (Físico 0)
+    // Puxa os modificadores manuais gerados pelos botões
+    const modMachucado = parseInt(document.getElementById('sheet-mod-machucado').value) || 0;
+    const modFerimento = parseInt(document.getElementById('sheet-mod-ferimento').value) || 0;
+    const modTrauma = parseInt(document.getElementById('sheet-mod-trauma').value) || 0;
+    const modLetal = parseInt(document.getElementById('sheet-mod-letal').value) || 0;
+
     let maxMachucado = 3;
     let maxFerimento = 2;
     let maxTrauma = 1;
-    const maxLetal = 1;
+    let maxLetal = 1;
 
-    // A cada 1 ponto de físico, distribui 1 espaço extra na ordem da hierarquia
     for (let i = 1; i <= fisico; i++) {
-        if (i % 3 === 1) {
-            maxMachucado++;
-        } else if (i % 3 === 2) {
-            maxFerimento++;
-        } else if (i % 3 === 0) {
-            maxTrauma++;
-        }
+        if (i % 3 === 1) maxMachucado++;
+        else if (i % 3 === 2) maxFerimento++;
+        else if (i % 3 === 0) maxTrauma++;
     }
+
+    // Soma a regra do atributo com os modificadores manuais (impedindo ficar menor que 0)
+    maxMachucado = Math.max(0, maxMachucado + modMachucado);
+    maxFerimento = Math.max(0, maxFerimento + modFerimento);
+    maxTrauma = Math.max(0, maxTrauma + modTrauma);
+    maxLetal = Math.max(0, maxLetal + modLetal);
 
     gerarCaixasDano('track-machucado-cells', maxMachucado, danoSalvo.machucado);
     gerarCaixasDano('track-ferimento-cells', maxFerimento, danoSalvo.ferimento);
@@ -555,3 +592,134 @@ document.addEventListener('click', (e) => {
     const idDaAbaAlvo = tabClicada.getAttribute('data-tab');
     document.getElementById(idDaAbaAlvo).classList.remove('hidden');
 });
+
+// ==========================================
+// 9. BANCO DE DADOS E COMPÊNDIO
+// ==========================================
+
+// O "Cérebro" do Compêndio (Pode adicionar os itens do PDF aqui depois)
+const compendiumDB = {
+    habTecnicas: [
+        { nome: "Atletismo", desc: "Esforço Físico, seja de forma bruta ou com finesse." },
+        { nome: "Ciências", desc: "Conhecimento Químico e Biológico." },
+        { nome: "Medicina", desc: "Primeiros socorros, análise forense, ajudar os outros." },
+        { nome: "Furtividade", desc: "Se esconder, passar despercebido." },
+        { nome: "Percepção", desc: "Vista direta/investigativa, percebendo detalhes." }
+    ],
+    habCombate: [
+        { nome: "Desarmado", desc: "Sabe brigar com socos e chutes." },
+        { nome: "Armas Brancas", desc: "Espadas, machados ou martelos." },
+        { nome: "Armas de Fogo", desc: "Pistolas, escopetas e rifles." }
+    ],
+    equipamentos: [
+        { nome: "Revólver", desc: "Dano: 2d6 | Recarga: 4 | Alcance: Médio | Extra: Confiável" },
+        { nome: "Jaqueta de Camurça", desc: "Proteção: +3 Maior / +2 Grave | +1 Red. Físico | +2 Red. Sobrenatural" },
+        { nome: "Armadura Militar de Elite", desc: "Proteção: +7 Maior / +10 Grave | +5 Red. Dano (Todos) | Impede desmembramento" }
+    ],
+    inventario: [
+        { nome: "Erva Verde", desc: "Cura Infecção." },
+        { nome: "Erva Azul", desc: "Cura um espaço de machucado." },
+        { nome: "Sucata", desc: "Material de criação e melhorias." },
+        { nome: "Heroína", desc: "Concede turno extra e vantagem em ataques/resistência por uma cena. (Risco de vício)" }
+    ],
+    talentos: [
+        { nome: "Defesa Quase Perfeita", desc: "Tier 1 (Violência) - Evita desmembramento/condições ao bloquear." },
+        { nome: "Casca Grossa", desc: "Tier 1 (Violência) - Redução de dano físico/balístico = metade do Físico." },
+        { nome: "Estômago de Ferro", desc: "Tier 1 (Sobrevivência) - Pode consumir comida estragada sem sofrer condições." }
+    ],
+    feiticos: [
+        { nome: "Névoa Negra", desc: "Seu corpo, roupas e equipamento se tornam fumaça viva." },
+        { nome: "Prisão", desc: "Prende criatura em espelho/pote por 1d4+1 rodadas." },
+        { nome: "Falar com Mortos", desc: "Um cadáver tocado responde 3 perguntas." }
+    ]
+};
+
+const compendiumModal = document.getElementById('compendium-modal');
+const compendiumList = document.getElementById('compendium-list');
+const compendiumSearch = document.getElementById('compendium-search');
+let compendiumTarget = ""; // Guarda qual textarea vai receber o texto
+let compendiumCategory = ""; // Guarda qual lista do banco de dados estamos lendo
+
+// Abrir o Compêndio
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-add-compendium')) {
+        compendiumTarget = e.target.getAttribute('data-target');
+        compendiumCategory = e.target.getAttribute('data-category');
+        
+        // Altera o título do modal
+        const titles = {
+            habTecnicas: "TÉCNICAS", habCombate: "COMBATE", equipamentos: "EQUIPAMENTOS",
+            inventario: "INVENTÁRIO", talentos: "TALENTOS", feiticos: "FEITIÇOS"
+        };
+        document.getElementById('compendium-title').innerText = `BANCO DE DADOS: ${titles[compendiumCategory]}`;
+        
+        compendiumSearch.value = "";
+        renderCompendiumList(compendiumDB[compendiumCategory]);
+        compendiumModal.classList.remove('hidden');
+    }
+});
+
+// Fechar Compêndio
+document.getElementById('btn-close-compendium').addEventListener('click', () => {
+    compendiumModal.classList.add('hidden');
+});
+
+// Renderizar a lista na tela
+function renderCompendiumList(items) {
+    compendiumList.innerHTML = "";
+    if (items.length === 0) {
+        compendiumList.innerHTML = "<li class='text-muted'>Nenhum item encontrado.</li>";
+        return;
+    }
+
+    items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = "compendium-item";
+        li.innerHTML = `
+            <div class="compendium-info">
+                <strong>${item.nome}</strong>
+                <span>${item.desc}</span>
+            </div>
+            <button class="btn-small btn-insert-item" style="border-color: var(--text-main); color: var(--text-main);">INSERIR</button>
+        `;
+        
+        li.querySelector('.btn-insert-item').addEventListener('click', () => {
+            inserirNaFicha(`${item.nome} (${item.desc})`);
+        });
+        
+        compendiumList.appendChild(li);
+    });
+}
+
+// Sistema de Busca (Pesquisa)
+compendiumSearch.addEventListener('input', (e) => {
+    const termo = e.target.value.toLowerCase();
+    const itensFiltrados = compendiumDB[compendiumCategory].filter(item => 
+        item.nome.toLowerCase().includes(termo) || item.desc.toLowerCase().includes(termo)
+    );
+    renderCompendiumList(itensFiltrados);
+});
+
+// Adicionar Personalizado
+document.getElementById('btn-add-custom-compendium').addEventListener('click', () => {
+    const val = document.getElementById('compendium-custom-val').value.trim();
+    if (val) {
+        inserirNaFicha(val);
+        document.getElementById('compendium-custom-val').value = "";
+    }
+});
+
+// Função que injeta o texto na ficha
+function inserirNaFicha(texto) {
+    const textarea = document.getElementById(compendiumTarget);
+    if (textarea) {
+        // Se já tiver texto, adiciona uma quebra de linha antes
+        const conteudoAtual = textarea.value.trim();
+        textarea.value = conteudoAtual ? `${conteudoAtual}\n- ${texto}` : `- ${texto}`;
+        
+        // Pisca a borda do textarea para mostrar que deu certo
+        textarea.style.borderColor = "var(--text-main)";
+        setTimeout(() => textarea.style.borderColor = "var(--border)", 500);
+    }
+    compendiumModal.classList.add('hidden');
+}

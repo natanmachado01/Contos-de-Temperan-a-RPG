@@ -172,3 +172,51 @@ button {
     border-bottom: 3px solid var(--text-main);
     box-shadow: inset 0 -5px 10px rgba(0, 255, 106, 0.1);
 }
+
+/* ==========================================
+   ITENS DO COMPÊNDIO
+========================================== */
+.compendium-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+    border-bottom: 1px dashed #333;
+    gap: 15px;
+}
+
+.compendium-item:hover {
+    background: rgba(0, 255, 106, 0.05);
+}
+
+.compendium-info strong {
+    color: var(--text-main);
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 3px;
+}
+
+.compendium-info span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-family: sans-serif;
+    line-height: 1.3;
+}
+/* ==========================================
+   BOTÕES DE MODIFICAR DANO
+========================================== */
+.btn-mod-dano {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-terminal);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: 0.2s;
+}
+
+.btn-mod-dano:hover {
+    color: var(--text-main);
+    text-shadow: 0 0 5px var(--text-main);
+}
